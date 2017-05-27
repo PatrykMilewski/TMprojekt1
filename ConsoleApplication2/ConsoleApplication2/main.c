@@ -3,6 +3,28 @@
 // usunac w finalnej wersji!!!!!!!! tylko do testow
 #define DEBUG
 
+#ifdef DEBUG
+
+int display;
+int XBYTE[];
+
+#else
+
+#include <at89x52.h>
+#include <absacc.h>
+
+#endif // DEBUG
+
+// adres rejestru CSKB1
+#define CSKB1 0xf022
+
+// kod klawisza, ktory sprawdza sprawdza refleks uzytkownika
+#define KLAWISZAKTYWACJI 0x7F
+
+// maksymalny czas, ktory moze wylosowac generator licz losowych
+// czas ten okresla, za ile zapali sie dioda
+#define MAXCZASCZEKANIA 3000
+
 // Dla wszystkich opoznien:
 // dlugosc_opoznienia = ( wartoscStalaOpoznienia ^ 2 ) * dlugosc_wykonania_jednej_instrukcji
 // np: dlugosc_opoznienia = ( displayNumberDelay ^ 2 ) * dlugosc_wykonania_jednej_instrukcji
@@ -15,14 +37,6 @@
 
 // random seed, duza liczba pierwsza
 #define randSeed 15486827
-
-
-#ifdef DEBUG
-
-int display;
-int XBYTE[];
-
-#endif // DEBUG
 
 const char numbers[10] = { 0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F };
 
@@ -61,15 +75,28 @@ void displayTime(unsigned int value) {
 
 int main() {
 	short iterationsRandom = 0;
+	int waitTime;
 
+	// nacisnij pierwszy raz klawisz aktywacji, aby pobrac przypadkowa liczbe
+	// potrzebna do inicjalizacji generatora liczb losowych
 	while (1) {
 		iterationsRandom++;
-
-
+		if (XBYTE[CSKB1] == KLAWISZAKTYWACJI)
+			break;
 	}
 
-	// petla glowna programu
-	while(1) {
-		
+	// inicjalizacja generatora liczb losowych
+	srand(iterationsRandom);
+
+
+	while (1) {
+		// losowanie kiedy zapali sie dioda
+		waitTime = rand() % MAXCZASCZEKANIA;
+
+		while (1) {
+
+			if (XBYTE[CSKB1] == KLAWISZAKTYWACJI);
+
+		}
 	}
 }
