@@ -1,12 +1,13 @@
 #include <stdlib.h>
 
-// usunac w finalnej wersji!!!!!!!! tylko do testow
+// wersja debug
 #define DEBUG
 
 #ifdef DEBUG
 
 int display;
-int XBYTE[];
+int *XBYTE = NULL;
+int P1_7;
 
 #else
 
@@ -54,6 +55,10 @@ int XBYTE[];
 // wynik pomiaru czasu reakcji na wyswietlaczu
 #define displayReactionTimePeriod 2000
 
+// stala okreslajaca ile czasu wykonywala sie petla,
+// ktora mierzy czas reakcji
+#define reactionTimeLoopLength (oneMilisecondConst / 2)
+
 #pragma endregion
 
 // tablica z cyframi od 0 do 9 dla wyswietlacza 7 segemntowego
@@ -78,7 +83,7 @@ void displayNumber(unsigned int value) {
 										// cyfra dziesiatek staje sie cyfra jednosci
 		
 		XBYTE[0xF030] = i + 1;
-		XBYTE[0xF038] = numberToDisplay;
+		XBYTE[0xF038] = numbers[numberToDisplay];
 
 		display = 0;
 		
@@ -102,7 +107,7 @@ void displayReactionTime(unsigned int value) {
 
 int main() {
 	short iterationsRandom = 0;
-	unsigned int waitTime;
+	unsigned int waitTime, reactionTime;
 
 	// nacisnij pierwszy raz klawisz aktywacji, aby pobrac przypadkowa liczbe
 	// potrzebna do inicjalizacji generatora liczb losowych
@@ -117,16 +122,32 @@ int main() {
 
 
 	while (TRUE) {
+		// wylaczenie diody test przed sprawdzeniem refleksu
+		P1_7 = 1;
+
 		// losowanie kiedy zapali sie dioda
 		// wartosc z przedzialu <MINCZASCZEKANIA, MAXCZASCZEKANIA>
-		waitTime = (rand() % (MAXCZASCZEKANIA + 1)) + MINCZASCZEKANIA;
+		waitTime = (rand() % (MAXCZASCZEKANIA - MINCZASCZEKANIA + 1)) + MINCZASCZEKANIA;
+		delayProgram(waitTime);
 
-		goToSleep(waitTime);
+		// wlaczenie diody test po wylosowanym czasie
+		P1_7 = 0;
+		
+		// zerowanie licznika pomiaru czasu
+		reactionTime = 0;
 
+		// pomiar czasu reakcji
 		while (TRUE) {
+			// sprwadzenie, czy zostal nacisniety klawisz aktyacji
+			if (XBYTE[CSKB1] == KLAWISZAKTYWACJI)
+				break;
 
-			if (XBYTE[CSKB1] == KLAWISZAKTYWACJI);
-
+			// nie wcisnieto przycisku, zwiekszenie czasu, po jakim czlowiek zareagowal
+			reactionTime++;
 		}
+
+		// czas zostal zmierzony, wyswieltamy wynik
+		// czas_reakcji = ile_razy_wykonala_sie_petla / czas_wykonania_jednej_petli
+		displayReactionTime(reactionTime / reactionTimeLoopLength);
 	}
 }
