@@ -52,7 +52,7 @@ sbit display = P1 ^ 6;
 
 // czas w milisekundach okreslajacy, ile czasu bedzie wyswietlany
 // wynik pomiaru czasu reakcji na wyswietlaczu
-#define displayReactionTimePeriod 20000
+#define displayReactionTimePeriod 5000
 
 // stala okreslajaca ile czasu wykonywala sie petla,
 // ktora mierzy czas reakcji
@@ -108,13 +108,13 @@ void displayReactionTime(unsigned long int value) {
 		display = 0;
 
 		// opoznienie, zeby cyfra wyswietlala sie przez jakis czas na wyswietlaczu
-		for (; k < displayDigitDelay; k++);
+		for (k = 0; k < displayDigitDelay; k++);
 
 		// wylaczenie wyswietlacza
 		display = 1;
 
 		// opoznienie pomiedzy cyframi
-		for (; k < displayDigitDelay; k++);
+		for (k = 0; k < displayDigitDelay; k++);
 	}
 }
 
